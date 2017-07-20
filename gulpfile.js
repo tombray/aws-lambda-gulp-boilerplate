@@ -11,8 +11,8 @@ var prompt = require('gulp-prompt');
 var fs = require('fs'),
     path = require('path');
 
-AWS.config.region = 'us-west-2';
-var lambda = new AWS.Lambda({apiVersion: '2015-03-31'});    
+AWS.config.region = 'us-east-1';
+var lambda = new AWS.Lambda({apiVersion: '2015-03-31'});
 
 var handleError = function (msg) {
   gutil.log(gutil.colors.red('ERROR!', msg)) ;
@@ -35,10 +35,10 @@ var argv = require('yargs')
 var lambdaName = argv.lambda;
 var lambdaPath = 'lambda/' + lambdaName;
 var dist = lambdaPath + '/dist';
-  
+
 //check that directory exists
 try {
-  fs.statSync(lambdaPath);  
+  fs.statSync(lambdaPath);
 } catch(e) {
   handleError(lambdaPath + ' does not exist');
 }
@@ -84,7 +84,7 @@ gulp.task('info', function (done) {
     }
     gutil.log(data.Configuration);
     done();
-  });  
+  });
 
 })
 
@@ -120,5 +120,3 @@ gulp.task('default', function(callback) {
     callback
   );
 });
-
-
