@@ -10,19 +10,19 @@ const copyDBSnapshots = allSnapshots => {
 
   autoSnapshots.map(snapshot => {
     const id = snapshot.DBSnapshotIdentifier;
-    const newId = 'backup-' + snapshot.DBSnapshotIdentifier.split('-').slice(1).join('-');
+    const backupId = snapshot.DBSnapshotIdentifier.split('rds:').slice(1).join('-') + '-backup';
 
-    if (manualSnapshotIds.includes(newId)) {
-      console.log('Snapshot ' + newId + ' already exists; skipping.');
+    if (manualSnapshotIds.includes(backupId)) {
+      console.log('Snapshot ' + backupId + ' already exists; skipping.');
       return;
+    } else {
+      console.log('Copying automated snapshot id ' + id + ` to manual snapshot id ` + backupId);
     }
 
     const params = {
       SourceDBSnapshotIdentifier: id,
-      TargetDBSnapshotIdentifier: newId
+      TargetDBSnapshotIdentifier: backupId
     };
-
-    console.log('Copying automated snapshot id ' + id + ` to manual snapshot id ` + newId);
     rds.copyDBSnapshot(params, (err, data) => {
       if (err) console.log(err, err.stack);
       else     console.log(data);
@@ -65,11 +65,11 @@ exports.handler = (event, context) => {
               console.log('No tags found; skipping id: ' + dbId);
               return;
             }
-            const backupTag = data.TagList.filter (tag => tag === {Key: 'cj:backup', Value: 'true'});
+            const backupTag = data.TagList.filter (({Key: k, Value: v}) => k === 'cj:backup' && v === 'true');
             if (backupTag.length === 0) {
-              console.log('This instance is not tagged with {cj:backup: true}; skipping id: ' + dbId);
+              console.log('This instance is not tagged with "cj:backup": "true"; skipping id: ' + dbId);
               return;
-            }
+            } else console.log('Instance tagged with "cj:backup": "true" found; proceeding with id: ' + dbId);
             const params = {
               DBInstanceIdentifier: dbId
             };
