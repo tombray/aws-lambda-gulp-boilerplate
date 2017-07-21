@@ -65,9 +65,9 @@ exports.handler = (event, context) => {
               console.log('No tags found; skipping id: ' + dbId);
               return;
             }
-            const backupTag = data.TagList.filter (tag => tag === {Key: 'backup', Value: 'true'});
+            const backupTag = data.TagList.filter (tag => tag === {Key: 'cj:backup', Value: 'true'});
             if (backupTag.length === 0) {
-              console.log('This instance is not tagged with {backup: true}; skipping id: ' + dbId);
+              console.log('This instance is not tagged with {cj:backup: true}; skipping id: ' + dbId);
               return;
             }
             const params = {
