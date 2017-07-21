@@ -28,6 +28,7 @@ Resources:
               - rds:DescribeDBInstances
               - rds:DescribeDBSnapshots
               - rds:DescribeReservedDBInstances
+              - rds:ListTagsForResource
             - Effect: Allow
               Resource: "*"
               Action:
