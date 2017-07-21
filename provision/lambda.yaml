@@ -10,20 +10,30 @@ Resources:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
-        # - Effect: Allow
-        #   Action:
-        #   - rds:CreateDBSnapshot
-        #   - rds:CopyDBSnapshot
-        #   - rds:DeleteDBSnapshot
-        #   - rds:DescribeDBInstances
-        #   - rds:DescribeDBSnapshots
-        #   - rds:DescribeReservedDBInstances
-        #   Principal:
-        #     Service: rds.amazonaws.com
         - Effect: Allow
           Principal:
             Service: lambda.amazonaws.com
           Action: sts:AssumeRole
+      Policies:
+        - PolicyName: rds-backup
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+            - Effect: Allow
+              Resource: "*"
+              Action:
+              - rds:CreateDBSnapshot
+              - rds:CopyDBSnapshot
+              - rds:DeleteDBSnapshot
+              - rds:DescribeDBInstances
+              - rds:DescribeDBSnapshots
+              - rds:DescribeReservedDBInstances
+            - Effect: Allow
+              Resource: "*"
+              Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
 
   rdsBackup:
     Type: AWS::Lambda::Function
