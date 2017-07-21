@@ -1,29 +1,29 @@
-var AWS = require('aws-sdk');
-var rds = new AWS.RDS();
+const AWS = require('aws-sdk');
+const rds = new AWS.RDS();
 
 //=============HELPERS==============
-var copyDBSnapshots = function(allSnapshots) {
+const copyDBSnapshots = allSnapshots => {
 
-  var autoSnapshots = allSnapshots.filter(function (s) { return s.SnapshotType === 'automated' });
-  var manualSnapshots = allSnapshots.filter(function (s) { return s.SnapshotType === 'manual' });
-  var manualSnapshotIds = manualSnapshots.map(function(s) { return s.DBSnapshotIdentifier });
+  const autoSnapshots = allSnapshots.filter(s => s.SnapshotType === 'automated');
+  const manualSnapshots = allSnapshots.filter(s => s.SnapshotType === 'manual');
+  const manualSnapshotIds = manualSnapshots.map(s => s.DBSnapshotIdentifier);
 
-  autoSnapshots.map(function(snapshot) {
-    var id = snapshot.DBSnapshotIdentifier;
-    var newId = 'backup-' + snapshot.DBSnapshotIdentifier.split('-').slice(1).join('-');
+  autoSnapshots.map(snapshot => {
+    const id = snapshot.DBSnapshotIdentifier;
+    const newId = 'backup-' + snapshot.DBSnapshotIdentifier.split('-').slice(1).join('-');
 
     if (manualSnapshotIds.includes(newId)) {
       console.log('Snapshot ' + newId + ' already exists; skipping.');
       return;
     }
 
-    var params = {
+    const params = {
       SourceDBSnapshotIdentifier: id,
       TargetDBSnapshotIdentifier: newId
     };
 
     console.log('Copying automated snapshot id ' + id + ` to manual snapshot id ` + newId);
-    rds.copyDBSnapshot(params, function(err, data) {
+    rds.copyDBSnapshot(params, (err, data) => {
       if (err) console.log(err, err.stack);
       else     console.log(data);
     });
@@ -33,11 +33,11 @@ var copyDBSnapshots = function(allSnapshots) {
 // =============LOGIC===============
 console.log('Loading function...');
 
-exports.handler = function(event, context) {
+exports.handler = (event, context) => {
   AWS.config.update({region: event.region});
 
   console.log('Getting all DB instances...');
-  rds.describeDBInstances({}, function(err, data) {
+  rds.describeDBInstances({}, (err, data) => {
     if (err) console.log(err, err.stack);
     else {
 
@@ -49,15 +49,15 @@ exports.handler = function(event, context) {
       }
 
       // map over db instances and grab tags for each
-      data.DBInstances.map(function(DBInstance) {
-        var dbId = DBInstance.DBInstanceIdentifier;
+      data.DBInstances.map(DBInstance => {
+        const dbId = DBInstance.DBInstanceIdentifier;
 
         console.log('Getting tags for id: ' + dbId);
 
-        var params = {
+        const params = {
           ResourceName: DBInstance.DBInstanceArn
         };
-        rds.listTagsForResource(params, function(err, data) {
+        rds.listTagsForResource(params, (err, data) => {
           if (err) console.log(err, err.stack);
           else {
             // if tags contain backup tag, copy snapshots for this db
@@ -65,16 +65,16 @@ exports.handler = function(event, context) {
               console.log('No tags found; skipping id: ' + dbId);
               return;
             }
-            var backupTag = data.TagList.filter (tag => tag === {Key: 'backup', Value: 'true'});
+            const backupTag = data.TagList.filter (tag => tag === {Key: 'backup', Value: 'true'});
             if (backupTag.length === 0) {
               console.log('This instance is not tagged with {backup: true}; skipping id: ' + dbId);
               return;
             }
-            var params = {
+            const params = {
               DBInstanceIdentifier: dbId
-            }
-            rds.describeDBSnapshots(params, function(err, data) {
-              var params = {
+            };
+            rds.describeDBSnapshots(params, (err, data) => {
+              const params = {
                 DBInstanceIdentifier:  dbId
               };
               if (err) console.log(err, err.stack);
@@ -84,7 +84,7 @@ exports.handler = function(event, context) {
             });
           }
         });
-      })
+      });
     }
   });
 };
