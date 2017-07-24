@@ -1,0 +1,14 @@
+resolver: lts-8.22
+
+packages:
+- location:
+    git: https://github.com/cjdev/cloud-seeder
+    commit: 8d8291683b3bcc69dad3768587dc7095f67bd9b4
+  extra-dep: true
+
+extra-deps:
+- optparse-applicative-0.14.0.0
+
+flags: {}
+
+extra-package-dbs: []

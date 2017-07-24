@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Provision rds-backup job
+
+Parameters: {}
+
+Resources:
+  executionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+        - PolicyName: rds-backup
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+            - Effect: Allow
+              Resource: "*"
+              Action:
+              - rds:CreateDBSnapshot
+              - rds:CopyDBSnapshot
+              - rds:DeleteDBSnapshot
+              - rds:DescribeDBInstances
+              - rds:DescribeDBSnapshots
+              - rds:DescribeReservedDBInstances
+              - rds:ListTagsForResource
+            - Effect: Allow
+              Resource: "*"
+              Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+
+  rdsBackup:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: rds-backup
+      Handler: index.handler
+      Role: !GetAtt
+        - executionRole
+        - Arn
+      Code:
+        # upload a "hello world" placeholder function -- actual code will be uploaded using gulp
+        ZipFile: >
+          console.log('Loading function');
+
+          exports.handler = function(event, context) {
+              //console.log('Received event:', JSON.stringify(event, null, 2));
+              console.log('value1 =', event.key1);
+              console.log('value2 =', event.key2);
+              context.succeed(event.key1);  // Echo back the first key value
+              // context.fail('Something went wrong');
+          };
+      Runtime: nodejs4.3
+      Timeout: 25
